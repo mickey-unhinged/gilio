@@ -70,6 +70,33 @@ export type Database = {
           },
         ]
       }
+      faqs: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string | null
+          id: string
+          question: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer: string
+          category: string
+          created_at?: string | null
+          id?: string
+          question: string
+          updated_at?: string | null
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string | null
+          id?: string
+          question?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -102,6 +129,7 @@ export type Database = {
       }
       tickets: {
         Row: {
+          assigned_to: string | null
           attachment_url: string | null
           category: string
           created_at: string | null
@@ -112,6 +140,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          assigned_to?: string | null
           attachment_url?: string | null
           category: string
           created_at?: string | null
@@ -122,6 +151,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          assigned_to?: string | null
           attachment_url?: string | null
           category?: string
           created_at?: string | null

@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
 
 interface Ticket {
   id: string;
@@ -24,6 +25,7 @@ const StudentRequests = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -61,9 +63,13 @@ const StudentRequests = () => {
     }
   };
 
-  const filteredTickets = filter === 'all' 
-    ? tickets 
-    : tickets.filter(t => t.status === filter);
+  const filteredTickets = tickets.filter((ticket) => {
+    const matchesStatus = filter === 'all' || ticket.status === filter;
+    const matchesSearch =
+      ticket.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ticket.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
 
   if (loading) {
     return (
@@ -84,6 +90,16 @@ const StudentRequests = () => {
             <Plus className="h-4 w-4 mr-1" />
             New Request
           </Button>
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search requests..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
 
         <Tabs value={filter} onValueChange={setFilter}>

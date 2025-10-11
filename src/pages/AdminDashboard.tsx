@@ -6,7 +6,9 @@ import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { Search } from 'lucide-react';
 
 interface Ticket {
   id: string;
@@ -26,6 +28,7 @@ const AdminDashboard = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!authLoading && (!user || userRole !== 'admin')) {
@@ -85,9 +88,15 @@ const AdminDashboard = () => {
     }
   };
 
-  const filteredTickets = filter === 'all' 
-    ? tickets 
-    : tickets.filter(t => t.category === filter);
+  const filteredTickets = tickets.filter((ticket) => {
+    const matchesCategory = filter === 'all' || ticket.category === filter;
+    const matchesSearch =
+      ticket.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ticket.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ticket.profiles?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ticket.profiles?.university.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const stats = {
     total: tickets.length,
@@ -151,7 +160,17 @@ const AdminDashboard = () => {
             <CardTitle>All Tickets</CardTitle>
             <CardDescription>Manage student support requests</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search tickets..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
             <Tabs value={filter} onValueChange={setFilter} className="w-full">
               <TabsList className="grid grid-cols-3 lg:grid-cols-6 mb-4">
                 <TabsTrigger value="all">All</TabsTrigger>
