@@ -16,6 +16,8 @@ import Announcements from "./pages/Announcements";
 import Profile from "./pages/Profile";
 import Help from "./pages/Help";
 import AdminManagement from "./pages/AdminManagement";
+import Tickets from "./pages/Tickets";
+import PendingApproval from "./pages/PendingApproval";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,10 +38,11 @@ const App = () => (
             <Route path="/student/requests/new" element={<NewTicket />} />
             <Route path="/student/requests/:id" element={<TicketDetail />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/tickets" element={<AdminDashboard />} />
+            <Route path="/admin/tickets" element={<Tickets />} />
             <Route path="/admin/tickets/:id" element={<TicketDetail />} />
             <Route path="/admin/announcements" element={<Announcements />} />
             <Route path="/admin/users" element={<AdminManagement />} />
+            <Route path="/awaiting-approval" element={<PendingApproval />} />
             <Route path="/announcements" element={<Announcements />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/help" element={<Help />} />

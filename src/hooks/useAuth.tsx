@@ -66,12 +66,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('user_roles')
-        .select('role')
+        .select('role, is_verified')
         .eq('user_id', userId)
         .single();
 
       if (!error && data) {
-        setUserRole(data.role as 'student' | 'admin');
+        const role = data.role as 'student' | 'admin';
+        if (role === 'admin') {
+          if (data.is_verified) {
+            setUserRole('admin');
+          } else {
+            setUserRole(null);
+            // Redirect unverified admins to pending approval page
+            navigate('/awaiting-approval');
+          }
+        } else {
+          setUserRole('student');
+        }
       }
     } catch (error) {
       console.error('Error fetching user role:', error);

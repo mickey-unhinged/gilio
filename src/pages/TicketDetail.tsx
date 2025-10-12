@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Send, ArrowLeft } from 'lucide-react';
 
@@ -104,6 +105,20 @@ const TicketDetail = () => {
       setLoading(false);
     }
   };
+
+  // When an admin opens a Pending ticket, auto-mark it as In Progress
+  useEffect(() => {
+    if (userRole === 'admin' && ticket && ticket.status === 'Pending') {
+      (async () => {
+        try {
+          await supabase.from('tickets').update({ status: 'In Progress' }).eq('id', ticket.id);
+          setTicket((prev) => (prev ? { ...prev, status: 'In Progress' } : prev));
+        } catch (e) {
+          // ignore; RLS will prevent if not allowed
+        }
+      })();
+    }
+  }, [ticket, userRole]);
 
   const fetchChats = async () => {
     try {
@@ -208,21 +223,33 @@ const TicketDetail = () => {
           <CardHeader>
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Badge variant="outline">{ticket.category}</Badge>
-                  {isAdmin && (
-                    <Select value={ticket.status} onValueChange={handleStatusChange}>
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Pending">Pending</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="Resolved">Resolved</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  {isAdmin ? (
+                    <>
+                      <Select value={ticket.status} onValueChange={handleStatusChange}>
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="In Progress">In Progress</SelectItem>
+                          <SelectItem value="Resolved">Resolved</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">Resolved</span>
+                        <Switch
+                          checked={ticket.status === 'Resolved'}
+                          onCheckedChange={(checked) =>
+                            handleStatusChange(checked ? 'Resolved' : 'In Progress')
+                          }
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <Badge>{ticket.status}</Badge>
                   )}
-                  {!isAdmin && <Badge>{ticket.status}</Badge>}
                 </div>
                 {isAdmin && (
                   <p className="text-sm text-muted-foreground">
