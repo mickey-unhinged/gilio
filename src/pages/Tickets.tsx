@@ -17,7 +17,7 @@ interface Ticket {
   status: string;
   created_at: string;
   student_id: string;
-  profiles?: { full_name: string } | null;
+  student_name?: string;
 }
 
 const Tickets = () => {
@@ -39,10 +39,7 @@ const Tickets = () => {
 
   const fetchTickets = async () => {
     try {
-      let query = supabase.from('tickets').select(`
-        *,
-        profiles:student_id (full_name)
-      `);
+      let query = supabase.from('tickets').select('*');
 
       if (userRole === 'student') {
         query = query.eq('student_id', user?.id);
@@ -50,9 +47,28 @@ const Tickets = () => {
 
       query = query.order('created_at', { ascending: false });
 
-      const { data, error } = await query;
-      if (error) throw error;
-      setTickets(data || []);
+      const { data: ticketsData, error: ticketsError } = await query;
+      if (ticketsError) throw ticketsError;
+
+      // Fetch student names for admin
+      if (userRole === 'admin' && ticketsData) {
+        const studentIds = [...new Set(ticketsData.map(t => t.student_id))];
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', studentIds);
+
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p.full_name]));
+        
+        const enrichedTickets = ticketsData.map(ticket => ({
+          ...ticket,
+          student_name: profilesMap.get(ticket.student_id) || 'Unknown'
+        }));
+        
+        setTickets(enrichedTickets);
+      } else {
+        setTickets(ticketsData || []);
+      }
     } catch (error) {
       console.error('Error fetching tickets:', error);
     } finally {
@@ -77,7 +93,7 @@ const Tickets = () => {
     const matchesSearch =
       ticket.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ticket.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ticket.profiles?.full_name.toLowerCase().includes(searchQuery.toLowerCase());
+      (ticket.student_name && ticket.student_name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesTab =
       activeTab === 'all' ||
@@ -136,8 +152,8 @@ const Tickets = () => {
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
                         <CardTitle className="text-lg">{ticket.category}</CardTitle>
-                        {userRole === 'admin' && ticket.profiles && (
-                          <CardDescription>Student: {ticket.profiles.full_name}</CardDescription>
+                        {userRole === 'admin' && ticket.student_name && (
+                          <CardDescription>Student: {ticket.student_name}</CardDescription>
                         )}
                       </div>
                       <Badge
