@@ -26,6 +26,7 @@ const Layout = ({ children, title }: LayoutProps) => {
     ? [
         { icon: Home, label: 'Dashboard', path: '/admin' },
         { icon: FileText, label: 'Tickets', path: '/admin/tickets' },
+        { icon: Bell, label: 'Announcements', path: '/announcements' },
         { icon: Users, label: 'Users', path: '/admin/users' },
         { icon: HelpCircle, label: 'Help', path: '/help' },
       ]

@@ -47,29 +47,23 @@ const AdminDashboard = () => {
     try {
       const { data, error } = await supabase
         .from('tickets')
-        .select('*')
+        .select('*, student:student_id(full_name, university)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Fetch profile info for each ticket
-      const ticketsWithProfiles = await Promise.all(
-        (data || []).map(async (ticket) => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name, university')
-            .eq('id', ticket.student_id)
-            .single();
+      // Transform the data to match our Ticket interface
+      const transformedTickets = (data || []).map((ticket: any) => ({
+        ...ticket,
+        profiles: {
+          full_name: ticket.student?.full_name || 'Unknown',
+          university: ticket.student?.university || 'Unknown',
+        },
+      }));
 
-          return {
-            ...ticket,
-            profiles: profile || { full_name: 'Unknown', university: 'Unknown' },
-          };
-        })
-      );
-
-      setTickets(ticketsWithProfiles);
+      setTickets(transformedTickets);
     } catch (error: any) {
+      console.error('Error loading tickets:', error);
       toast.error('Error loading tickets');
     } finally {
       setLoading(false);
