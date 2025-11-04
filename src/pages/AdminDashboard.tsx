@@ -45,23 +45,40 @@ const AdminDashboard = () => {
 
   const fetchTickets = async () => {
     try {
-      const { data, error } = await supabase
+      // First get all tickets
+      const { data: ticketsData, error: ticketsError } = await supabase
         .from('tickets')
-        .select('*, student:student_id(full_name, university)')
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (ticketsError) throw ticketsError;
 
-      // Transform the data to match our Ticket interface
-      const transformedTickets = (data || []).map((ticket: any) => ({
+      // Get unique student IDs
+      const studentIds = [...new Set(ticketsData?.map(t => t.student_id) || [])];
+      
+      // Fetch all student profiles in one query
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, university')
+        .in('id', studentIds);
+
+      if (profilesError) throw profilesError;
+
+      // Create a map of profiles for quick lookup
+      const profilesMap = new Map(
+        profilesData?.map(p => [p.id, p]) || []
+      );
+
+      // Combine tickets with profiles
+      const ticketsWithProfiles = (ticketsData || []).map(ticket => ({
         ...ticket,
-        profiles: {
-          full_name: ticket.student?.full_name || 'Unknown',
-          university: ticket.student?.university || 'Unknown',
+        profiles: profilesMap.get(ticket.student_id) || { 
+          full_name: 'Unknown', 
+          university: 'Unknown' 
         },
       }));
 
-      setTickets(transformedTickets);
+      setTickets(ticketsWithProfiles);
     } catch (error: any) {
       console.error('Error loading tickets:', error);
       toast.error('Error loading tickets');
