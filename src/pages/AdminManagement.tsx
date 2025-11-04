@@ -117,7 +117,7 @@ const AdminManagement = () => {
         })
       );
 
-      setStudents(usersWithData.filter((u) => u.role === 'student' && u.ticket_stats!.total > 0));
+      setStudents(usersWithData.filter((u) => u.role === 'student'));
       setPendingAdmins(usersWithData.filter((u) => u.role === 'admin' && !u.is_verified));
     } catch (error: any) {
       toast.error('Error loading users');
@@ -203,7 +203,7 @@ const AdminManagement = () => {
         <div className="grid grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Students with Tickets</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{stats.students}</div>
@@ -230,8 +230,8 @@ const AdminManagement = () => {
           <TabsContent value="students" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Students with Tickets</CardTitle>
-                <CardDescription>Click on a student to view their tickets</CardDescription>
+                <CardTitle>Students</CardTitle>
+                <CardDescription>All students from your university</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="relative">
