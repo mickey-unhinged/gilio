@@ -1,8 +1,8 @@
-# Welcome to your Lovable project
+# Welcome to My GILIO project
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/28c9d48d-9a23-4ada-a4ba-7c7d5dd1aa35
+**URL**: https://gilio.lovable.app
 
 ## How can I edit this code?
 
@@ -59,6 +59,7 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- PLpgSQL
 
 ## How can I deploy this project?
 
